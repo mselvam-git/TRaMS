@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: trams-backend
+    runtime: python
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_eFItl7d9HxUh@ep-aged-hall-alt6wk2u-pooler.c-3.eu-central-1.aws.neon.tech/trams?sslmode=require&channel_binding=require
+      - key: PYTHON_VERSION
+        value: 3.11.0

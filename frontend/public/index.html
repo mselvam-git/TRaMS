@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRaMS · Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:        #080A10;
+  --panel:     #0D1018;
+  --border:    #1A1F2E;
+  --border2:   #252A3A;
+  --text:      #C8CDD8;
+  --text2:     #6A7080;
+  --text3:     #3A3F50;
+  --accent:    #00E5C3;
+  --accent2:   #4F8EF7;
+  --pink:      #E882DC;
+  --up:        #00C7B1;
+  --down:      #F06060;
+  --gold:      #F7C948;
+  --mono:      'Space Mono', monospace;
+  --sans:      'DM Sans', sans-serif;
+  --display:   'Bebas Neue', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,229,195,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,195,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── Layout ── */
+.root { position: relative; z-index: 1; display: flex; height: 100vh; overflow: hidden; }
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar {
+  height: 52px; flex-shrink: 0;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 16px;
+}
+.content {
+  flex: 1; overflow-y: auto;
+  padding: 20px;
+  display: none; /* hidden until tab active */
+}
+.content.active { display: block; }
+
+/* ── Sidebar ── */
+.logo {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-text {
+  font-family: var(--display);
+  font-size: 28px; letter-spacing: 3px;
+  color: var(--accent);
+  line-height: 1;
+}
+.logo-sub {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); margin-top: 3px;
+}
+.nav { padding: 10px 8px; flex: 1; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  cursor: pointer; font-size: 12px; font-weight: 500;
+  color: var(--text2); letter-spacing: 0.3px;
+  transition: all 0.15s; margin-bottom: 2px;
+  border: 1px solid transparent;
+  user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.nav-item.active {
+  background: rgba(0,229,195,0.08);
+  border-color: rgba(0,229,195,0.15);
+  color: var(--accent);
+}
+.nav-icon { width: 16px; text-align: center; font-size: 13px; }
+.nav-count {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 10px;
+  background: rgba(255,255,255,0.06); color: var(--text3);
+  padding: 1px 6px; border-radius: 10px;
+}
+.nav-sep {
+  height: 1px; background: var(--border);
+  margin: 8px 4px; border: none;
+}
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 10px; color: var(--text3);
+  font-family: var(--mono);
+}
+.fx-rates { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.fx-pill {
+  display: flex; gap: 4px; align-items: baseline;
+  font-family: var(--mono); font-size: 10px;
+}
+.fx-label { color: var(--text3); }
+.fx-val   { color: var(--text2); font-weight: 700; }
+
+/* ── Topbar ── */
+.topbar-title {
+  font-family: var(--display); font-size: 18px; letter-spacing: 2px;
+  color: var(--text); flex: 1;
+}
+.last-updated { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+.refresh-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 8px;
+  background: rgba(0,229,195,0.1); border: 1px solid rgba(0,229,195,0.2);
+  color: var(--accent); font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: var(--sans);
+  letter-spacing: 0.5px;
+}
+.refresh-btn:hover { background: rgba(0,229,195,0.18); }
+.refresh-btn.spinning svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 5px 12px;
+  font-size: 12px; color: var(--text2);
+}
+.search-box input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-size: 12px; width: 180px;
+  font-family: var(--sans);
+}
+.search-box input::placeholder { color: var(--text3); }
+
+.owner-toggle {
+  display: flex; gap: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border2); border-radius: 8px; overflow: hidden;
+}
+.owner-btn {
+  padding: 5px 12px; font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  color: var(--text2); letter-spacing: 0.5px;
+  border: none; background: none; font-family: var(--sans);
+}
+.owner-btn.active-selvam  { background: rgba(79,142,247,0.2); color: #4F8EF7; }
+.owner-btn.active-radhika { background: rgba(232,130,220,0.2); color: var(--pink); }
+.owner-btn.active-both    { background: rgba(0,229,195,0.15); color: var(--accent); }
+
+/* ── Cards ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--accent-line, var(--accent)); opacity: 0.5;
+}
+.stat-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text3); margin-bottom: 8px;
+}
+.stat-value {
+  font-family: var(--mono); font-size: 18px; font-weight: 700;
+  color: var(--text); line-height: 1;
+}
+.stat-sub {
+  font-family: var(--mono); font-size: 10px; margin-top: 4px;
+  color: var(--text3);
+}
+
+/* ── Panels / Sections ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px;
+  margin-bottom: 16px;
+}
+.panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.panel-title {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text2); font-weight: 600;
+}
+
+/* ── Holdings Table ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  text-align: left; padding: 8px 10px;
+  font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text3); font-weight: 600; border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+thead th:hover { color: var(--text2); }
+thead th.sorted { color: var(--accent); }
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.1s;
+}
+tbody tr:hover { background: rgba(255,255,255,0.025); }
+tbody td { padding: 8px 10px; color: var(--text); }
+.sym { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); }
+.name-cell { font-size: 11px; color: var(--text2); max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.num { font-family: var(--mono); font-size: 11px; text-align: right; }
+.up-text { color: var(--up); }
+.dn-text { color: var(--down); }
+.badge {
+  display: inline-block; padding: 2px 7px; border-radius: 6px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge-broker { background: rgba(79,142,247,0.15); color: #4F8EF7; }
+.badge-selvam { background: rgba(79,142,247,0.12); color: #4F8EF7; }
+.badge-radhika { background: rgba(232,130,220,0.12); color: var(--pink); }
+.badge-up { background: rgba(0,199,177,0.12); color: var(--up); }
+.badge-dn { background: rgba(240,96,96,0.12); color: var(--down); }
+
+/* ── Pct bar ── */
+.pct-bar { display: flex; align-items: center; gap: 8px; }
+.pct-track { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; min-width: 40px; }
+.pct-fill  { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+/* ── Copy Traders ── */
+.ct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
+.ct-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 15px;
+  transition: border-color 0.2s;
+  border-top-width: 3px;
+}
+.ct-card:hover { border-color: var(--border2); }
+.ct-name { font-weight: 700; font-size: 14px; color: var(--text); }
+.ct-meta { font-size: 10px; color: var(--text3); margin-top: 3px; display: flex; gap: 8px; align-items: center; }
+.ct-pct  { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+.ct-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; }
+.ct-kv { background: rgba(255,255,255,0.025); border-radius: 7px; padding: 7px 9px; }
+.ct-k { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); }
+.ct-v { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text2); margin-top: 2px; }
+.ct-bar { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-top: 8px; }
+.ct-bar-fill { height: 100%; border-radius: 2px; }
+
+/* ── Chart ── */
+.chart-wrap { height: 200px; }
+
+/* ── Two-col layout ── */
+.row { display: flex; gap: 16px; margin-bottom: 16px; }
+.col-2 { flex: 2; }
+.col-1 { flex: 1; }
+
+/* ── Owner split bar ── */
+.owner-split {
+  display: flex; height: 8px; border-radius: 4px; overflow: hidden;
+  margin-bottom: 4px;
+}
+.owner-seg { height: 100%; transition: width 0.6s; }
+
+/* ── Empty state ── */
+.empty {
+  text-align: center; padding: 60px 20px; color: var(--text3);
+}
+.empty-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.4; }
+.empty-msg  { font-size: 13px; }
+
+/* ── Loading skeleton ── */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ── Status dot ── */
+.dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+.dot-green { background: var(--up); box-shadow: 0 0 6px var(--up); }
+.dot-red   { background: var(--down); }
+.dot-gray  { background: var(--text3); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── Animations ── */
+.fade-in { animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── Alerts ── */
+.error-banner {
+  background: rgba(240,96,96,0.1); border: 1px solid rgba(240,96,96,0.25);
+  border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #F09090;
+  margin-bottom: 12px; display: none;
+}
+
+/* ── Pill tabs ── */
+.pill-tabs { display: flex; gap: 4px; }
+.pill-tab {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  color: var(--text2); border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.pill-tab.active {
+  background: rgba(0,229,195,0.1); border-color: rgba(0,229,195,0.2);
+  color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { width: 180px; }
+  .row { flex-direction: column; }
+}
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="root">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">TRaMS</div>
+    <div class="logo-sub">Portfolio Intelligence</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-item active" data-tab="overview" onclick="switchTab('overview', this)">
+      <span class="nav-icon">⬡</span> Overview
+    </div>
+    <div class="nav-item" data-tab="holdings" onclick="switchTab('holdings', this)">
+      <span class="nav-icon">◈</span> Holdings
+      <span class="nav-count" id="nav-holdings-count">—</span>
+    </div>
+    <hr class="nav-sep">
+    <div style="font-size:9px;letter-spacing:1.5px;color:var(--text3);padding:4px 12px 6px;text-transform:uppercase;">Brokers</div>
+    <div class="nav-item" data-tab="zerodha" onclick="switchTab('zerodha', this)">
+      <span class="nav-icon">Z</span> Zerodha
+    </div>
+    <div class="nav-item" data-tab="sharekhan" onclick="switchTab('sharekhan', this)">
+      <span class="nav-icon">S</span> Sharekhan
+    </div>
+    <div class="nav-item" data-tab="ibkr" onclick="switchTab('ibkr', this)">
+      <span class="nav-icon">I</span> IBKR
+    </div>
+    <div class="nav-item" data-tab="etoro" onclick="switchTab('etoro', this)">
+      <span class="nav-icon">E</span> eToro
+      <span class="nav-count" id="nav-etoro-count">—</span>
+    </div>
+    <div class="nav-item" data-tab="copytraders" onclick="switchTab('copytraders', this)">
+      <span class="nav-icon">⊕</span> Copy Traders
+      <span class="nav-count" id="nav-ct-count">—</span>
+    </div>
+    <div class="nav-item" data-tab="aionion" onclick="switchTab('aionion', this)">
+      <span class="nav-icon">A</span> Aionion
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div>FX Rates</div>
+    <div class="fx-rates">
+      <div class="fx-pill"><span class="fx-label">USD</span><span class="fx-val" id="fx-usd">₹83.5</span></div>
+      <div class="fx-pill"><span class="fx-label">EUR</span><span class="fx-val" id="fx-eur">₹90.2</span></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Overview</div>
+
+    <div class="search-box" id="search-wrap" style="display:none">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Search symbol or name…" oninput="filterHoldings()">
+    </div>
+
+    <div class="owner-toggle">
+      <button class="owner-btn active-both" id="ob-both"    onclick="setOwner('both')">All</button>
+      <button class="owner-btn"             id="ob-selvam"  onclick="setOwner('selvam')">Selvam</button>
+      <button class="owner-btn"             id="ob-radhika" onclick="setOwner('radhika')">Radhika</button>
+    </div>
+
+    <div class="last-updated" id="last-updated">—</div>
+
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- ═══ OVERVIEW TAB ═══ -->
+  <div class="content active fade-in" id="tab-overview">
+    <div class="error-banner" id="err-overview"></div>
+
+    <!-- Summary Stats -->
+    <div class="stat-grid" id="summary-stats">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Owner split -->
+    <div class="panel" id="owner-panel">
+      <div class="panel-header">
+        <span class="panel-title">Owner Distribution</span>
+        <span style="font-size:10px;font-family:var(--mono);color:var(--text3)" id="owner-split-label">—</span>
+      </div>
+      <div class="owner-split" id="owner-split-bar"></div>
+      <div style="display:flex;gap:20px;margin-top:10px;font-size:11px;" id="owner-split-legend"></div>
+    </div>
+
+    <!-- Two-col: Broker allocation + Performance -->
+    <div class="row">
+      <div class="col-2">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Broker Allocation</span>
+          </div>
+          <div id="broker-alloc-list"></div>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Asset Mix</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="asset-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top movers -->
+    <div class="row">
+      <div class="col-1">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Top Gainers</span></div>
+          <div id="top-gainers"></div>
+        </div>
+      </div>
+      <div class="col-1">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Top Losers</span></div>
+          <div id="top-losers"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HOLDINGS TAB ═══ -->
+  <div class="content fade-in" id="tab-holdings">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">All Holdings</span>
+        <div class="pill-tabs">
+          <div class="pill-tab active" onclick="setHoldingsView('all',this)">All</div>
+          <div class="pill-tab" onclick="setHoldingsView('stock',this)">Stocks</div>
+          <div class="pill-tab" onclick="setHoldingsView('etf',this)">ETF</div>
+          <div class="pill-tab" onclick="setHoldingsView('crypto',this)">Crypto</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="holdings-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('symbol')">Symbol</th>
+              <th onclick="sortTable('name')">Name</th>
+              <th onclick="sortTable('broker')">Broker</th>
+              <th onclick="sortTable('quantity')" class="num">Qty</th>
+              <th onclick="sortTable('average_price')" class="num">Avg Price</th>
+              <th onclick="sortTable('current_price')" class="num">LTP</th>
+              <th onclick="sortTable('invested_value')" class="num">Invested</th>
+              <th onclick="sortTable('current_value')" class="num">Value</th>
+              <th onclick="sortTable('pnl')" class="num">P&L</th>
+              <th onclick="sortTable('pnl_percent')" class="num sorted">P&L %</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BROKER TABS (generic) ═══ -->
+  <div class="content fade-in" id="tab-zerodha">
+    <div id="zerodha-content"></div>
+  </div>
+  <div class="content fade-in" id="tab-sharekhan">
+    <div id="sharekhan-content"></div>
+  </div>
+  <div class="content fade-in" id="tab-ibkr">
+    <div id="ibkr-content"></div>
+  </div>
+  <div class="content fade-in" id="tab-etoro">
+    <div id="etoro-content"></div>
+  </div>
+  <div class="content fade-in" id="tab-aionion">
+    <div id="aionion-content"></div>
+  </div>
+
+  <!-- ═══ COPY TRADERS TAB ═══ -->
+  <div class="content fade-in" id="tab-copytraders">
+    <div class="stat-grid" id="ct-summary-stats"></div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Copy Trader Portfolios</span>
+        <div class="owner-toggle" style="scale:0.9">
+          <button class="owner-btn active-both" id="ct-ob-both"    onclick="setCTOwner('both')">All</button>
+          <button class="owner-btn"             id="ct-ob-selvam"  onclick="setCTOwner('selvam')">Selvam</button>
+          <button class="owner-btn"             id="ct-ob-radhika" onclick="setCTOwner('radhika')">Radhika</button>
+        </div>
+      </div>
+      <div class="ct-grid" id="ct-cards"></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════
+const API = 'http://localhost:8000/api';
+const FX  = { INR: 1, USD: 83.5, EUR: 90.2 };
+
+let _state = {
+  holdings:    [],
+  summary:     null,
+  copyTraders: [],
+  owner:       'both',
+  ctOwner:     'both',
+  holdingsView: 'all',
+  sortCol:     'pnl_percent',
+  sortDir:     -1,   // -1 = desc
+  query:       '',
+  brokerAlloc: [],
+  assetChart:  null,
+  refreshing:  false,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════════
+function toInr(val, currency='INR') {
+  return (val || 0) * (FX[currency] || 1);
+}
+function fmt(n, decimals=0, prefix='₹') {
+  if (n === null || n === undefined) return '—';
+  const v = Math.abs(n);
+  let s;
+  if (v >= 10_000_000)   s = (v/10_000_000).toFixed(2) + 'Cr';
+  else if (v >= 100_000) s = (v/100_000).toFixed(2) + 'L';
+  else if (v >= 1_000)   s = (v/1_000).toFixed(1) + 'K';
+  else                   s = v.toFixed(decimals);
+  return (n < 0 ? '-' : '') + prefix + s;
+}
+function fmtUsd(n, decimals=0) {
+  if (n === null || n === undefined) return '—';
+  const v = Math.abs(n);
+  let s;
+  if (v >= 1_000_000) s = (v/1_000_000).toFixed(2) + 'M';
+  else if (v >= 1_000) s = (v/1_000).toFixed(1) + 'K';
+  else s = v.toFixed(decimals);
+  return (n < 0 ? '-' : '') + '$' + s;
+}
+function pct(n) {
+  if (n === null || n === undefined) return '—';
+  const s = n >= 0 ? '+' : '';
+  return s + n.toFixed(2) + '%';
+}
+function cls(n) { return n >= 0 ? 'up-text' : 'dn-text'; }
+function badgeCls(n) { return n >= 0 ? 'badge-up' : 'badge-dn'; }
+function brokerColor(b) {
+  const m = {
+    'Zerodha': '#4F8EF7', 'Sharekhan': '#F7A84F',
+    'Interactive Brokers': '#E882DC', 'eToro': '#00C7B1',
+    'Aionion Capital': '#F7C948',
+  };
+  return m[b] || '#6A7080';
+}
+function ownerColor(o) {
+  return o === 'selvam' ? '#4F8EF7' : o === 'radhika' ? '#E882DC' : '#00E5C3';
+}
+
+function filterByOwner(items) {
+  if (_state.owner === 'both') return items;
+  return items.filter(h => (h.owner || 'selvam') === _state.owner);
+}
+
+async function apiFetch(path, opts={}) {
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), 25000);
+  try {
+    const r = await fetch(API + path, { signal: ctrl.signal, ...opts });
+    clearTimeout(tid);
+    if (!r.ok) throw new Error(`${r.status}`);
+    return await r.json();
+  } catch(e) {
+    clearTimeout(tid);
+    console.warn('API error', path, e.message);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TAB ROUTING
+// ══════════════════════════════════════════════════════════════════════
+const TAB_TITLES = {
+  overview: 'Overview', holdings: 'All Holdings',
+  zerodha: 'Zerodha', sharekhan: 'Sharekhan',
+  ibkr: 'Interactive Brokers', etoro: 'eToro',
+  copytraders: 'Copy Traders', aionion: 'Aionion Capital',
+};
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbar-title').textContent = TAB_TITLES[tab] || tab;
+
+  // Show search only in holdings
+  document.getElementById('search-wrap').style.display =
+    (tab === 'holdings') ? 'flex' : 'none';
+
+  // Render broker-specific tabs
+  if (['zerodha','sharekhan','ibkr','etoro','aionion'].includes(tab)) {
+    renderBrokerTab(tab);
+  }
+  if (tab === 'copytraders') renderCopyTraders();
+  if (tab === 'holdings') renderHoldingsTable();
+  if (tab === 'overview') renderOverview();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DATA LOAD
+// ══════════════════════════════════════════════════════════════════════
+async function refreshAll() {
+  if (_state.refreshing) return;
+  _state.refreshing = true;
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+
+  try {
+    const [holdings, summary, copyTraders] = await Promise.all([
+      apiFetch('/portfolio/holdings'),
+      apiFetch('/portfolio/summary'),
+      apiFetch('/etoro/copy-traders'),
+    ]);
+
+    if (holdings)    _state.holdings    = holdings;
+    if (summary)     _state.summary     = summary;
+    if (copyTraders) _state.copyTraders = copyTraders;
+
+    // Update FX from summary if available
+    // (backend can expose this in summary later)
+
+    // Update nav counts
+    document.getElementById('nav-holdings-count').textContent = _state.holdings.length;
+    document.getElementById('nav-etoro-count').textContent =
+      _state.holdings.filter(h => h.broker === 'eToro').length;
+    document.getElementById('nav-ct-count').textContent = _state.copyTraders.length;
+
+    // Update timestamp
+    const now = new Date();
+    document.getElementById('last-updated').textContent =
+      now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+
+    // Re-render active tab
+    const activeTab = document.querySelector('.nav-item.active')?.dataset.tab || 'overview';
+    if (activeTab === 'overview')     renderOverview();
+    if (activeTab === 'holdings')     renderHoldingsTable();
+    if (activeTab === 'copytraders')  renderCopyTraders();
+    if (['zerodha','sharekhan','ibkr','etoro','aionion'].includes(activeTab))
+      renderBrokerTab(activeTab);
+
+  } finally {
+    _state.refreshing = false;
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════════════════════════════════════
+function renderOverview() {
+  const s = _state.summary;
+  const holdings = filterByOwner(_state.holdings);
+
+  // ── Summary stat cards ──
+  const totalVal   = s ? holdings.reduce((a,h) => a + toInr(h.current_value, h.currency), 0)
+                       : 0;
+  const totalInv   = s ? holdings.reduce((a,h) => a + toInr(h.invested_value, h.currency), 0) : 0;
+  const totalPnl   = totalVal - totalInv;
+  const pnlPct     = totalInv ? (totalPnl/totalInv*100) : 0;
+
+  const statsEl = document.getElementById('summary-stats');
+  const stats = [
+    { label: 'Portfolio Value', value: fmt(totalVal), sub: `${holdings.length} holdings`, accent: '#00E5C3' },
+    { label: 'Total Invested',  value: fmt(totalInv), sub: 'Cost basis', accent: '#4F8EF7' },
+    { label: 'Overall P&L',     value: fmt(totalPnl), sub: pct(pnlPct), accent: totalPnl>=0 ? '#00C7B1' : '#F06060', color: cls(totalPnl) },
+    { label: 'Selvam Portfolio',value: fmt(s?.selvam_value || 0), accent: '#4F8EF7' },
+    { label: 'Radhika Portfolio',value: fmt(s?.radhika_value || 0), accent: '#E882DC' },
+  ];
+  statsEl.innerHTML = stats.map(st => `
+    <div class="stat-card" style="--accent-line:${st.accent}">
+      <div class="stat-label">${st.label}</div>
+      <div class="stat-value ${st.color||''}">${st.value}</div>
+      ${st.sub ? `<div class="stat-sub">${st.sub}</div>` : ''}
+    </div>
+  `).join('');
+
+  // ── Owner split ──
+  const sVal = s?.selvam_value  || 0;
+  const rVal = s?.radhika_value || 0;
+  const cVal = sVal + rVal;
+  const sPct = cVal ? (sVal/cVal*100) : 50;
+  const rPct = 100 - sPct;
+  document.getElementById('owner-split-bar').innerHTML = `
+    <div class="owner-seg" style="width:${sPct}%;background:#4F8EF7"></div>
+    <div class="owner-seg" style="width:${rPct}%;background:#E882DC"></div>
+  `;
+  document.getElementById('owner-split-label').textContent =
+    `Selvam ${sPct.toFixed(1)}% · Radhika ${rPct.toFixed(1)}%`;
+  document.getElementById('owner-split-legend').innerHTML = `
+    <div style="display:flex;gap:6px;align-items:center">
+      <div style="width:8px;height:8px;border-radius:50%;background:#4F8EF7"></div>
+      <span style="color:var(--text2)">Selvam</span>
+      <span style="font-family:var(--mono);color:#4F8EF7">${fmt(sVal)}</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div style="width:8px;height:8px;border-radius:50%;background:#E882DC"></div>
+      <span style="color:var(--text2)">Radhika</span>
+      <span style="font-family:var(--mono);color:#E882DC">${fmt(rVal)}</span>
+    </div>
+  `;
+
+  // ── Broker allocation ──
+  if (s?.brokers) {
+    const brokerEl = document.getElementById('broker-alloc-list');
+    const brokers  = s.brokers.filter(b => b.total_value > 0);
+    const maxVal   = Math.max(...brokers.map(b => toInr(b.total_value, b.currency)));
+    brokerEl.innerHTML = brokers.map(b => {
+      const val   = toInr(b.total_value, b.currency);
+      const inv   = toInr(b.total_invested, b.currency);
+      const pnl   = val - inv;
+      const pct_  = inv ? (pnl/inv*100) : 0;
+      const width = maxVal ? (val/maxVal*100) : 0;
+      const color = brokerColor(b.broker);
+      return `
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;align-items:center">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:3px;height:16px;border-radius:2px;background:${color}"></div>
+              <span style="font-size:12px;font-weight:600;color:var(--text)">${b.broker}</span>
+              <span class="badge badge-${b.owner==='radhika'?'radhika':'selvam'}">${b.owner}</span>
+            </div>
+            <div style="text-align:right">
+              <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)">${fmt(val)}</span>
+              <span style="font-family:var(--mono);font-size:10px;margin-left:8px;${pct_>=0?'color:var(--up)':'color:var(--down)'}">${pct(pct_)}</span>
+            </div>
+          </div>
+          <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px">
+            <div style="height:100%;width:${width}%;background:${color};border-radius:2px;transition:width 0.6s;opacity:0.7"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── Asset chart (donut) ──
+  const assetMap = {};
+  holdings.forEach(h => {
+    const t = (h.asset_type||'stock').toLowerCase().replace('_',' ');
+    assetMap[t] = (assetMap[t]||0) + toInr(h.current_value, h.currency);
+  });
+  const assetLabels = Object.keys(assetMap);
+  const assetData   = Object.values(assetMap);
+  const COLORS = ['#00E5C3','#4F8EF7','#E882DC','#F7C948','#F06060','#7ED6A5'];
+
+  if (_state.assetChart) { _state.assetChart.destroy(); _state.assetChart = null; }
+  const ctx = document.getElementById('asset-chart');
+  if (ctx && assetData.length) {
+    _state.assetChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: assetLabels,
+        datasets: [{ data: assetData, backgroundColor: COLORS, borderWidth: 0, hoverOffset: 6 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              color: '#6A7080', font: { size: 11 },
+              boxWidth: 10, padding: 12,
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)}`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Top movers ──
+  const sorted = [...holdings]
+    .filter(h => h.pnl_percent !== null && isFinite(h.pnl_percent))
+    .sort((a,b) => b.pnl_percent - a.pnl_percent);
+
+  const moverRow = h => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+      <div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)">${h.symbol}</div>
+        <div style="font-size:9px;color:var(--text3)">${h.broker}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="${cls(h.pnl_percent)}" style="font-family:var(--mono);font-size:12px;font-weight:700">${pct(h.pnl_percent)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3)">${fmt(toInr(h.current_value, h.currency))}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('top-gainers').innerHTML = sorted.slice(0,8).map(moverRow).join('');
+  document.getElementById('top-losers').innerHTML  = sorted.slice(-8).reverse().map(moverRow).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// HOLDINGS TABLE
+// ══════════════════════════════════════════════════════════════════════
+function renderHoldingsTable() {
+  let items = filterByOwner(_state.holdings);
+
+  // Type filter
+  if (_state.holdingsView !== 'all') {
+    items = items.filter(h => (h.asset_type||'').toLowerCase().includes(_state.holdingsView));
+  }
+
+  // Search filter
+  const q = _state.query.toLowerCase();
+  if (q) {
+    items = items.filter(h =>
+      (h.symbol||'').toLowerCase().includes(q) ||
+      (h.name||'').toLowerCase().includes(q) ||
+      (h.broker||'').toLowerCase().includes(q)
+    );
+  }
+
+  // Sort
+  items = [...items].sort((a,b) => {
+    const col = _state.sortCol;
+    let va = a[col], vb = b[col];
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return _state.sortDir;
+    if (va > vb) return -_state.sortDir;
+    return 0;
+  });
+
+  const tbody = document.getElementById('holdings-tbody');
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty"><div class="empty-icon">◫</div><div class="empty-msg">No holdings found</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = items.map(h => {
+    const valInr = toInr(h.current_value,  h.currency);
+    const invInr = toInr(h.invested_value, h.currency);
+    const pnlInr = valInr - invInr;
+    const avgPx  = h.currency === 'INR' ? fmt(h.average_price,'₹') : fmtUsd(h.average_price);
+    const curPx  = h.currency === 'INR' ? fmt(h.current_price,'₹') : fmtUsd(h.current_price);
+    return `
+      <tr>
+        <td><span class="sym">${h.symbol||'—'}</span></td>
+        <td><div class="name-cell">${h.name||'—'}</div></td>
+        <td>
+          <span class="badge badge-broker" style="background:${brokerColor(h.broker)}18;color:${brokerColor(h.broker)}">${h.broker}</span>
+        </td>
+        <td class="num">${(h.quantity||0).toFixed(2)}</td>
+        <td class="num">${h.currency==='INR'?fmt(h.average_price,2,'₹'):fmtUsd(h.average_price,2)}</td>
+        <td class="num">${h.currency==='INR'?fmt(h.current_price,2,'₹'):fmtUsd(h.current_price,2)}</td>
+        <td class="num">${fmt(invInr)}</td>
+        <td class="num">${fmt(valInr)}</td>
+        <td class="num ${cls(pnlInr)}">${fmt(pnlInr)}</td>
+        <td class="num">
+          <span class="badge ${badgeCls(h.pnl_percent)}">${pct(h.pnl_percent)}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function sortTable(col) {
+  if (_state.sortCol === col) _state.sortDir = -_state.sortDir;
+  else { _state.sortCol = col; _state.sortDir = -1; }
+  renderHoldingsTable();
+}
+function setHoldingsView(v, el) {
+  _state.holdingsView = v;
+  document.querySelectorAll('#tab-holdings .pill-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderHoldingsTable();
+}
+function filterHoldings() {
+  _state.query = document.getElementById('search-input').value;
+  renderHoldingsTable();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// BROKER TABS
+// ══════════════════════════════════════════════════════════════════════
+const BROKER_MAP = {
+  zerodha:   'Zerodha',
+  sharekhan: 'Sharekhan',
+  ibkr:      'Interactive Brokers',
+  etoro:     'eToro',
+  aionion:   'Aionion Capital',
+};
+
+function renderBrokerTab(tab) {
+  const brokerName = BROKER_MAP[tab];
+  const color      = brokerColor(brokerName);
+  const holdings   = _state.holdings.filter(h => h.broker === brokerName);
+  const filtered   = filterByOwner(holdings);
+  const s          = _state.summary?.brokers?.find(b => b.broker === brokerName);
+  const el         = document.getElementById(tab + '-content');
+
+  const totalVal = filtered.reduce((a,h) => a+toInr(h.current_value,h.currency),0);
+  const totalInv = filtered.reduce((a,h) => a+toInr(h.invested_value,h.currency),0);
+  const totalPnl = totalVal - totalInv;
+  const pnlPct_  = totalInv ? (totalPnl/totalInv*100) : 0;
+
+  el.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:16px">
+      ${[
+        {label:'Current Value', value:fmt(totalVal), accent:color},
+        {label:'Total Invested', value:fmt(totalInv), accent:'#4F8EF7'},
+        {label:'P&L', value:fmt(totalPnl), sub:pct(pnlPct_), accent:totalPnl>=0?'#00C7B1':'#F06060', color:cls(totalPnl)},
+        {label:'Holdings', value:filtered.length, accent:color},
+      ].map(st=>`
+        <div class="stat-card" style="--accent-line:${st.accent}">
+          <div class="stat-label">${st.label}</div>
+          <div class="stat-value ${st.color||''}">${st.value}</div>
+          ${st.sub?`<div class="stat-sub">${st.sub}</div>`:''}
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">${brokerName} Holdings</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Symbol</th><th>Name</th>
+            ${brokerName==='Interactive Brokers'?'<th>Owner</th>':''}
+            <th class="num">Qty</th><th class="num">Avg Price</th>
+            <th class="num">LTP</th><th class="num">Invested</th>
+            <th class="num">Value</th><th class="num">P&L</th>
+            <th class="num">P&L %</th>
+          </tr></thead>
+          <tbody>
+            ${filtered.sort((a,b)=>b.pnl_percent-a.pnl_percent).map(h=>{
+              const valI = toInr(h.current_value, h.currency);
+              const invI = toInr(h.invested_value, h.currency);
+              const pnlI = valI - invI;
+              return `<tr>
+                <td><span class="sym">${h.symbol}</span></td>
+                <td><div class="name-cell">${h.name||'—'}</div></td>
+                ${brokerName==='Interactive Brokers'?`<td><span class="badge badge-${h.owner==='radhika'?'radhika':'selvam'}">${h.owner}</span></td>`:''}
+                <td class="num">${(h.quantity||0).toFixed(2)}</td>
+                <td class="num">${h.currency==='INR'?fmt(h.average_price,2,'₹'):fmtUsd(h.average_price,2)}</td>
+                <td class="num">${h.currency==='INR'?fmt(h.current_price,2,'₹'):fmtUsd(h.current_price,2)}</td>
+                <td class="num">${fmt(invI)}</td>
+                <td class="num">${fmt(valI)}</td>
+                <td class="num ${cls(pnlI)}">${fmt(pnlI)}</td>
+                <td class="num"><span class="badge ${badgeCls(h.pnl_percent)}">${pct(h.pnl_percent)}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// COPY TRADERS
+// ══════════════════════════════════════════════════════════════════════
+function setCTOwner(o) {
+  _state.ctOwner = o;
+  ['both','selvam','radhika'].forEach(x => {
+    const el = document.getElementById('ct-ob-'+x);
+    el.className = 'owner-btn' + (x===o ? ` active-${o}` : '');
+  });
+  renderCopyTraders();
+}
+
+function renderCopyTraders() {
+  let cts = _state.copyTraders;
+  if (_state.ctOwner !== 'both') {
+    cts = cts.filter(ct => ct.owner === _state.ctOwner);
+  }
+
+  // Summary stats for CT tab
+  const totalDep   = cts.reduce((a,c)=>a+c.deposited,0);
+  const totalVal   = cts.reduce((a,c)=>a+c.total_value,0);
+  const totalUpnl  = cts.reduce((a,c)=>a+c.unrealized_pnl,0);
+  const totalCpnl  = cts.reduce((a,c)=>a+c.closed_pnl,0);
+  const totalPnl   = totalUpnl + totalCpnl;
+
+  document.getElementById('ct-summary-stats').innerHTML = [
+    {label:'Copy Portfolios', value:cts.length, accent:'#00E5C3'},
+    {label:'Total Deployed',  value:fmtUsd(totalDep), accent:'#4F8EF7'},
+    {label:'Portfolio Value', value:fmtUsd(totalVal), accent:'#00C7B1'},
+    {label:'Unrealized P&L',  value:fmtUsd(totalUpnl), accent:totalUpnl>=0?'#00C7B1':'#F06060', color:cls(totalUpnl)},
+    {label:'Closed P&L',      value:fmtUsd(totalCpnl), accent:totalCpnl>=0?'#7ED6A5':'#F87171', color:cls(totalCpnl)},
+    {label:'Total P&L',       value:fmtUsd(totalPnl),  accent:totalPnl>=0?'#00C7B1':'#F06060', color:cls(totalPnl)},
+  ].map(st=>`
+    <div class="stat-card" style="--accent-line:${st.accent}">
+      <div class="stat-label">${st.label}</div>
+      <div class="stat-value ${st.color||''}">${st.value}</div>
+    </div>
+  `).join('');
+
+  // Cards
+  const maxVal = Math.max(...cts.map(c=>c.deposited), 1);
+  const container = document.getElementById('ct-cards');
+
+  if (!cts.length) {
+    container.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⊕</div><div class="empty-msg">No copy traders found</div></div>`;
+    return;
+  }
+
+  container.innerHTML = cts.map(ct => {
+    const profit    = ct.total_pnl >= 0;
+    const borderCol = profit ? '#00C7B1' : '#F06060';
+    const barW      = Math.min((ct.deposited / maxVal) * 100, 100).toFixed(1);
+    const oColor    = ownerColor(ct.owner);
+    return `
+      <div class="ct-card" style="border-color:${borderCol}28;border-top-color:${borderCol}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div>
+            <div class="ct-name">${ct.trader}</div>
+            <div class="ct-meta">
+              <span class="badge badge-${ct.owner==='radhika'?'radhika':'selvam'}">${ct.owner}</span>
+              ${ct.is_paused?'<span class="badge" style="background:rgba(247,168,79,0.15);color:#F7A84F">Paused</span>':''}
+              <span>since ${ct.started}</span>
+            </div>
+          </div>
+          <span class="ct-pct ${cls(ct.pnl_percent)}">${pct(ct.pnl_percent)}</span>
+        </div>
+
+        <div class="ct-grid2">
+          <div class="ct-kv">
+            <div class="ct-k">Deployed</div>
+            <div class="ct-v">${fmtUsd(ct.deposited)}</div>
+          </div>
+          <div class="ct-kv">
+            <div class="ct-k">Value</div>
+            <div class="ct-v" style="color:var(--text)">${fmtUsd(ct.total_value)}</div>
+          </div>
+          <div class="ct-kv">
+            <div class="ct-k">Unrealized</div>
+            <div class="ct-v ${cls(ct.unrealized_pnl)}">${ct.unrealized_pnl>=0?'+':''}${fmtUsd(ct.unrealized_pnl)}</div>
+          </div>
+          <div class="ct-kv">
+            <div class="ct-k">Closed P&L</div>
+            <div class="ct-v ${cls(ct.closed_pnl)}">${ct.closed_pnl>=0?'+':''}${fmtUsd(ct.closed_pnl)}</div>
+          </div>
+        </div>
+
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">${ct.positions_count} positions · ${fmtUsd(ct.available)} available</div>
+        <div class="ct-bar" style="margin-top:8px">
+          <div class="ct-bar-fill" style="width:${barW}%;background:${borderCol};opacity:0.7"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// OWNER TOGGLE
+// ══════════════════════════════════════════════════════════════════════
+function setOwner(o) {
+  _state.owner = o;
+  ['both','selvam','radhika'].forEach(x => {
+    const el = document.getElementById('ob-'+x);
+    el.className = 'owner-btn' + (x===o ? ` active-${o}` : '');
+  });
+  // Re-render active tab
+  const activeTab = document.querySelector('.nav-item.active')?.dataset.tab || 'overview';
+  if (activeTab === 'overview')    renderOverview();
+  if (activeTab === 'holdings')    renderHoldingsTable();
+  if (['zerodha','sharekhan','ibkr','etoro','aionion'].includes(activeTab))
+    renderBrokerTab(activeTab);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  refreshAll();
+  // Auto-refresh every 5 minutes
+  setInterval(refreshAll, 5 * 60 * 1000);
+});
+</script>
+</body>
+</html>

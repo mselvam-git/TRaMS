@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0D0F1A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TRaMS">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>TRaMS · Portfolio Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#080A10;--panel:#0D1018;--border:#1A1F2E;--border2:#252A3A;--t1:#C8CDD8;--t2:#6A7080;--t3:#3A3F50;--accent:#00E5C3;--blue:#4F8EF7;--pink:#E882DC;--up:#00C7B1;--dn:#F06060;--gold:#F7C948;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;--disp:'Bebas Neue',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,229,195,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,195,.012) 1px,transparent 1px);background-size:60px 60px}
+.root{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden}
+
+/* Sidebar */
+.sb{width:216px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.logo{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+.logo-t{font-family:var(--disp);font-size:26px;letter-spacing:3px;color:var(--accent);line-height:1}
+.logo-s{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-top:3px}
+.nav{padding:10px 8px;flex:1;overflow-y:auto}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--t2);transition:all .15s;margin-bottom:2px;border:1px solid transparent;user-select:none}
+.ni:hover{background:rgba(255,255,255,.04);color:var(--t1)}
+.ni.active{background:rgba(0,229,195,.08);border-color:rgba(0,229,195,.15);color:var(--accent)}
+.ni-ic{width:15px;text-align:center;font-size:13px}
+.ni-ct{margin-left:auto;font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.06);color:var(--t3);padding:1px 6px;border-radius:10px}
+.ns{height:1px;background:var(--border);margin:7px 4px;border:none}
+.ng{font-size:9px;letter-spacing:1.5px;color:var(--t3);padding:4px 12px 5px;text-transform:uppercase}
+.sb-foot{padding:12px 16px;border-top:1px solid var(--border)}
+.fx-row{display:flex;gap:12px;margin-top:4px;flex-wrap:wrap}
+.fx-item{font-family:var(--mono);font-size:10px}
+.fx-lbl{color:var(--t3)}.fx-val{color:var(--t2);font-weight:700}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:14px}
+.tb-title{font-family:var(--disp);font-size:18px;letter-spacing:2px;color:var(--t1);flex:1}
+.lu{font-size:10px;color:var(--t3);font-family:var(--mono)}
+.content{flex:1;overflow-y:auto;padding:18px;display:none}
+.content.active{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Search */
+.search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:8px;padding:5px 12px}
+.search input{background:none;border:none;outline:none;color:var(--t1);font-size:12px;width:170px;font-family:var(--sans)}
+.search input::placeholder{color:var(--t3)}
+
+/* Owner toggle */
+.otgl{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:8px;overflow:hidden}
+.obtn{padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--t2);border:none;background:none;font-family:var(--sans);transition:all .15s}
+.obtn.a-both   {background:rgba(0,229,195,.12);color:var(--accent)}
+.obtn.a-selvam {background:rgba(79,142,247,.15);color:var(--blue)}
+.obtn.a-radhika{background:rgba(232,130,220,.15);color:var(--pink)}
+
+/* Refresh btn */
+.rfbtn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(0,229,195,.1);border:1px solid rgba(0,229,195,.2);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.rfbtn:hover{background:rgba(0,229,195,.18)}
+.rfbtn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Stat grid */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:11px;margin-bottom:18px}
+.sc{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px 17px;position:relative;overflow:hidden;transition:border-color .2s}
+.sc:hover{border-color:var(--border2)}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--acl,var(--accent));opacity:.5}
+.sl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t3);margin-bottom:7px}
+.sv{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--t1);line-height:1}
+.ss{font-family:var(--mono);font-size:10px;margin-top:3px;color:var(--t3)}
+
+/* Panel */
+.p{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:15px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.pt{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--t2);font-weight:600}
+
+/* Row layout */
+.row{display:flex;gap:14px;margin-bottom:14px}
+.c2{flex:2}.c1{flex:1}
+
+/* Table */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;padding:7px 9px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:600;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+thead th:hover{color:var(--t2)}
+thead th.st{color:var(--accent)}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody td{padding:7px 9px;color:var(--t1)}
+.sym{font-family:var(--mono);font-size:12px;font-weight:700}
+.nc{font-size:11px;color:var(--t2);max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.num{font-family:var(--mono);font-size:11px;text-align:right}
+.u{color:var(--up)}.d{color:var(--dn)}
+
+/* Badge */
+.b{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.b-up{background:rgba(0,199,177,.12);color:var(--up)}.b-dn{background:rgba(240,96,96,.12);color:var(--dn)}
+.b-s{background:rgba(79,142,247,.12);color:var(--blue)}.b-r{background:rgba(232,130,220,.12);color:var(--pink)}
+.b-br{background:rgba(79,142,247,.15);color:var(--blue)}
+
+/* Copy trader cards */
+.ctg{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:11px}
+.ctc{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;border-top-width:3px;transition:border-color .2s}
+.ctn{font-weight:700;font-size:14px;color:var(--t1)}
+.ctm{font-size:10px;color:var(--t3);margin-top:3px;display:flex;gap:7px;align-items:center}
+.ctp{font-family:var(--mono);font-size:13px;font-weight:700}
+.ct2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 0}
+.ctk{background:rgba(255,255,255,.025);border-radius:7px;padding:6px 9px}
+.ctk-l{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--t3)}
+.ctk-v{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t2);margin-top:2px}
+.ct-bar{height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:7px}
+.ct-bar-f{height:100%;border-radius:2px}
+
+/* Profile card */
+.prof-card{display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,.025);border-radius:10px;margin-bottom:10px}
+.prof-av{width:44px;height:44px;border-radius:50%;background:var(--border2);overflow:hidden}
+.prof-av img{width:100%;height:100%;object-fit:cover}
+.prof-name{font-weight:700;font-size:14px;color:var(--t1)}
+.prof-u{font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+
+/* Performance chart */
+.chart-h{height:200px}.chart-sm{height:140px}
+
+/* Owner split */
+.os-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:5px}
+.os-seg{height:100%;transition:width .6s}
+
+/* Pill tabs */
+.ptabs{display:flex;gap:4px}
+.ptab{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;color:var(--t2);border:1px solid transparent;transition:all .15s}
+.ptab.active{background:rgba(0,229,195,.1);border-color:rgba(0,229,195,.2);color:var(--accent)}
+
+/* Empty */
+.empty{text-align:center;padding:50px 20px;color:var(--t3)}
+.empty-i{font-size:32px;margin-bottom:9px;opacity:.4}.empty-m{font-size:13px}
+
+/* Scroll */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:800px){.sb{width:180px}.row{flex-direction:column}}
+@media(max-width:600px){.sb{display:none}.sg{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="root">
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="logo">
+    <div class="logo-t">TRaMS</div>
+    <div class="logo-s">Portfolio Intelligence</div>
+  </div>
+  <nav class="nav">
+    <div class="ni active" data-tab="overview" onclick="go('overview',this)"><span class="ni-ic">⬡</span>Overview</div>
+    <div class="ni" data-tab="holdings" onclick="go('holdings',this)"><span class="ni-ic">◈</span>Holdings<span class="ni-ct" id="nc-h">—</span></div>
+    <hr class="ns">
+    <div class="ng">Brokers</div>
+    <div class="ni" data-tab="zerodha"   onclick="go('zerodha',this)"><span class="ni-ic">Z</span>Zerodha</div>
+    <div class="ni" data-tab="sharekhan" onclick="go('sharekhan',this)"><span class="ni-ic">S</span>Sharekhan</div>
+    <div class="ni" data-tab="ibkr"      onclick="go('ibkr',this)"><span class="ni-ic">I</span>IBKR</div>
+    <div class="ni" data-tab="etoro"     onclick="go('etoro',this)"><span class="ni-ic">E</span>eToro<span class="ni-ct" id="nc-e">—</span></div>
+    <div class="ni" data-tab="copytrade" onclick="go('copytrade',this)"><span class="ni-ic">⊕</span>Copy Traders<span class="ni-ct" id="nc-ct">—</span></div>
+    <div class="ni" data-tab="aionion"   onclick="go('aionion',this)"><span class="ni-ic">A</span>Aionion</div>
+    <hr class="ns">
+    <div class="ni" data-tab="perf" onclick="go('perf',this)"><span class="ni-ic">◷</span>Performance</div>
+  </nav>
+  <div class="sb-foot">
+    <div style="font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase">FX Rates</div>
+    <div class="fx-row">
+      <div class="fx-item"><span class="fx-lbl">USD </span><span class="fx-val" id="fx-usd">₹83.5</span></div>
+      <div class="fx-item"><span class="fx-lbl">EUR </span><span class="fx-val" id="fx-eur">₹90.2</span></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="tb-title" id="tb-t">Overview</div>
+    <div class="search" id="srch" style="display:none">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="srch-i" type="text" placeholder="Search symbol or name…" oninput="filt()">
+    </div>
+    <div class="otgl">
+      <button class="obtn a-both" id="ob-both"    onclick="setOwner('both')">All</button>
+      <button class="obtn"        id="ob-selvam"  onclick="setOwner('selvam')">Selvam</button>
+      <button class="obtn"        id="ob-radhika" onclick="setOwner('radhika')">Radhika</button>
+    </div>
+    <div id="broker-status" style="display:flex;gap:6px;align-items:center"></div>
+    <div class="lu" id="lu">—</div>
+    <button class="rfbtn" id="rfbtn" onclick="refresh()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>Refresh
+    </button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="content active" id="tab-overview">
+    <div class="sg" id="ov-stats"></div>
+    <div class="p" id="ov-owner">
+      <div class="ph"><span class="pt">Owner Split</span><span style="font-size:10px;font-family:var(--mono);color:var(--t3)" id="ov-osplit-lbl">—</span></div>
+      <div class="os-bar" id="ov-osplit"></div>
+      <div style="display:flex;gap:18px;margin-top:9px;font-size:11px" id="ov-osplit-leg"></div>
+    </div>
+    <div class="row">
+      <div class="c2">
+        <div class="p">
+          <div class="ph"><span class="pt">Broker Allocation</span></div>
+          <div id="ov-brokers"></div>
+        </div>
+      </div>
+      <div class="c1">
+        <div class="p">
+          <div class="ph"><span class="pt">Asset Mix</span></div>
+          <div class="chart-h"><canvas id="asset-ch"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="c1"><div class="p"><div class="ph"><span class="pt">Top Gainers</span></div><div id="ov-gainers"></div></div></div>
+      <div class="c1"><div class="p"><div class="ph"><span class="pt">Top Losers</span></div><div id="ov-losers"></div></div></div>
+    </div>
+  </div>
+
+  <!-- HOLDINGS -->
+  <div class="content" id="tab-holdings">
+    <div class="p">
+      <div class="ph">
+        <span class="pt">All Holdings</span>
+        <div class="ptabs">
+          <div class="ptab active" onclick="hv('all',this)">All</div>
+          <div class="ptab" onclick="hv('stock',this)">Stocks</div>
+          <div class="ptab" onclick="hv('etf',this)">ETF</div>
+          <div class="ptab" onclick="hv('crypto',this)">Crypto</div>
+        </div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr>
+            <th onclick="sort('symbol')">Symbol</th>
+            <th onclick="sort('name')">Name</th>
+            <th onclick="sort('broker')">Broker</th>
+            <th onclick="sort('quantity')" class="num">Qty</th>
+            <th onclick="sort('average_price')" class="num">Avg</th>
+            <th onclick="sort('current_price')" class="num">LTP</th>
+            <th onclick="sort('invested_value')" class="num">Invested</th>
+            <th onclick="sort('current_value')" class="num">Value</th>
+            <th onclick="sort('pnl')" class="num">P&L</th>
+            <th onclick="sort('pnl_percent')" class="num st">P&L %</th>
+          </tr></thead>
+          <tbody id="h-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BROKER TABS (generic) -->
+  <div class="content" id="tab-zerodha"><div id="zc"></div></div>
+  <div class="content" id="tab-sharekhan"><div id="sc_"></div></div>
+  <div class="content" id="tab-ibkr"><div id="ic"></div></div>
+  <div class="content" id="tab-etoro"><div id="ec"></div></div>
+  <div class="content" id="tab-aionion"><div id="ac"></div></div>
+
+  <!-- COPY TRADERS -->
+  <div class="content" id="tab-copytrade">
+    <div class="sg" id="ct-stats"></div>
+    <div class="p">
+      <div class="ph">
+        <span class="pt">Copy Trader Portfolios</span>
+        <div class="otgl" style="scale:.9">
+          <button class="obtn a-both" id="ct-ob-both"    onclick="setCTOwner('both')">All</button>
+          <button class="obtn"        id="ct-ob-selvam"  onclick="setCTOwner('selvam')">Selvam</button>
+          <button class="obtn"        id="ct-ob-radhika" onclick="setCTOwner('radhika')">Radhika</button>
+        </div>
+      </div>
+      <div class="ctg" id="ct-cards"></div>
+    </div>
+  </div>
+
+  <!-- PERFORMANCE -->
+  <div class="content" id="tab-perf">
+    <div class="sg" id="perf-profiles"></div>
+    <div class="row">
+      <div class="c1">
+        <div class="p">
+          <div class="ph">
+            <span class="pt">Selvam (amizhthini) — Monthly Gain %</span>
+          </div>
+          <div class="chart-h"><canvas id="perf-ch-s"></canvas></div>
+        </div>
+      </div>
+      <div class="c1">
+        <div class="p">
+          <div class="ph">
+            <span class="pt">Radhika (aadhirai) — Monthly Gain %</span>
+          </div>
+          <div class="chart-h"><canvas id="perf-ch-r"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="p">
+      <div class="ph"><span class="pt">Yearly Performance</span></div>
+      <div class="chart-h"><canvas id="perf-ch-y"></canvas></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════════════════
+const API = window.__TRAMS_API__ || 'http://localhost:8000/api';
+const FX  = {INR:1, USD:83.5, EUR:90.2};
+const TAB_TITLES = {
+  overview:'Overview', holdings:'All Holdings',
+  zerodha:'Zerodha', sharekhan:'Sharekhan', ibkr:'Interactive Brokers',
+  etoro:'eToro', copytrade:'Copy Traders', aionion:'Aionion Capital',
+  perf:'Performance'
+};
+const BROKER_MAP = {zerodha:'Zerodha',sharekhan:'Sharekhan',ibkr:'Interactive Brokers',etoro:'eToro',aionion:'Aionion Capital'};
+const BROKER_COLOR = {'Zerodha':'#4F8EF7','Sharekhan':'#F7A84F','Interactive Brokers':'#E882DC','eToro':'#00C7B1','Aionion Capital':'#F7C948'};
+
+let S = {
+  holdings:[], summary:null, copyTraders:[], perfHistory:{}, profiles:{},
+  owner:'both', ctOwner:'both', hView:'all', sortCol:'pnl_percent', sortDir:-1,
+  query:'', charts:{}, refreshing:false
+};
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+const toInr = (v,c='INR') => (v||0)*(FX[c]||1);
+function fmt(n, prefix='₹') {
+  if(n===null||n===undefined)return '—';
+  const v=Math.abs(n), neg=n<0?'-':'';
+  if(v>=1e7) return neg+prefix+(v/1e7).toFixed(2)+'Cr';
+  if(v>=1e5) return neg+prefix+(v/1e5).toFixed(2)+'L';
+  if(v>=1e3) return neg+prefix+(v/1e3).toFixed(1)+'K';
+  return neg+prefix+v.toFixed(0);
+}
+function fmtUsd(n) {
+  if(n===null||n===undefined)return '—';
+  const v=Math.abs(n), neg=n<0?'-':'';
+  if(v>=1e6) return neg+'$'+(v/1e6).toFixed(2)+'M';
+  if(v>=1e3) return neg+'$'+(v/1e3).toFixed(1)+'K';
+  return neg+'$'+v.toFixed(0);
+}
+const pct = n => n===null||n===undefined ? '—' : (n>=0?'+':'')+n.toFixed(2)+'%';
+const uc  = n => n>=0?'u':'d';
+const bup = n => n>=0?'b-up':'b-dn';
+const oc  = o => o==='selvam'?'#4F8EF7':o==='radhika'?'#E882DC':'#00E5C3';
+const bc  = b => BROKER_COLOR[b]||'#6A7080';
+
+function fow(items) { return S.owner==='both' ? items : items.filter(h=>(h.owner||'selvam')===S.owner); }
+
+async function apiFetch(path) {
+  try {
+    const r = await fetch(API+path);
+    if(!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e){ console.warn('API',path,e.message); return null; }
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB ROUTING
+// ══════════════════════════════════════════════════════════
+function go(tab, el) {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('tb-t').textContent = TAB_TITLES[tab]||tab;
+  document.getElementById('srch').style.display = tab==='holdings'?'flex':'none';
+  if(['zerodha','sharekhan','ibkr','etoro','aionion'].includes(tab)) renderBroker(tab);
+  if(tab==='holdings')  renderTable();
+  if(tab==='overview')  renderOv();
+  if(tab==='copytrade') renderCT();
+  if(tab==='perf')      renderPerf();
+}
+
+// ══════════════════════════════════════════════════════════
+// DATA REFRESH
+// ══════════════════════════════════════════════════════════
+async function refresh() {
+  if(S.refreshing) return;
+  S.refreshing = true;
+  const btn = document.getElementById('rfbtn');
+  btn.classList.add('spin'); btn.disabled=true;
+  try {
+    const [holdings, summary, ct, perf, status] = await Promise.all([
+      apiFetch('/portfolio/holdings'),
+      apiFetch('/portfolio/summary'),
+      apiFetch('/etoro/copy-traders'),
+      apiFetch('/etoro/performance'),
+      fetch('http://localhost:8000/api/status').then(r=>r.ok?r.json():null).catch(()=>null),
+    ]);
+    if(holdings) S.holdings    = holdings;
+    if(summary)  S.summary     = summary;
+    if(ct)       S.copyTraders = ct;
+    if(perf)     S.perfHistory = perf;
+
+    // Broker status dots in topbar
+    if(status) {
+      const dots = [
+        {key:'zerodha',    label:'Z', color:'#4F8EF7'},
+        {key:'sharekhan',  label:'S', color:'#F7A84F'},
+        {key:'etoro_selvam', label:'eS', color:'#00C7B1'},
+        {key:'etoro_radhika',label:'eR', color:'#E882DC'},
+        {key:'aionion',    label:'A', color:'#F7C948'},
+      ];
+      document.getElementById('broker-status').innerHTML = dots.map(d=>{
+        const on = status[d.key];
+        return `<span title="${d.key}: ${on?'Connected':'Missing token'}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;font-family:var(--mono);color:${on?d.color:'#3A3F50'}">
+          <span style="width:6px;height:6px;border-radius:50%;background:${on?d.color:'#3A3F50'};display:inline-block"></span>${d.label}</span>`;
+      }).join('');
+    }
+
+    // Nav counts
+    document.getElementById('nc-h').textContent  = S.holdings.length;
+    document.getElementById('nc-e').textContent  = S.holdings.filter(h=>h.broker==='eToro').length;
+    document.getElementById('nc-ct').textContent = S.copyTraders.length;
+    document.getElementById('lu').textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+    // Re-render
+    const tab = document.querySelector('.ni.active')?.dataset.tab||'overview';
+    if(tab==='overview')  renderOv();
+    if(tab==='holdings')  renderTable();
+    if(tab==='copytrade') renderCT();
+    if(tab==='perf')      renderPerf();
+    if(['zerodha','sharekhan','ibkr','etoro','aionion'].includes(tab)) renderBroker(tab);
+  } finally {
+    S.refreshing=false; btn.classList.remove('spin'); btn.disabled=false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════════════════════════
+function renderOv() {
+  const h = fow(S.holdings);
+  const totalVal = h.reduce((a,x)=>a+toInr(x.current_value,x.currency),0);
+  const totalInv = h.reduce((a,x)=>a+toInr(x.invested_value,x.currency),0);
+  const totalPnl = totalVal-totalInv;
+  const pnlPct   = totalInv ? totalPnl/totalInv*100 : 0;
+  const sVal     = S.summary?.selvam_value  || 0;
+  const rVal     = S.summary?.radhika_value || 0;
+  const cVal     = sVal+rVal;
+
+  // Stats
+  document.getElementById('ov-stats').innerHTML = [
+    {l:'Portfolio Value', v:fmt(totalVal),   ac:'#00E5C3'},
+    {l:'Total Invested',  v:fmt(totalInv),   ac:'#4F8EF7'},
+    {l:'Overall P&L',     v:fmt(totalPnl),   s:pct(pnlPct), ac:totalPnl>=0?'#00C7B1':'#F06060', cl:uc(totalPnl)},
+    {l:'Selvam Total',    v:fmt(sVal),        ac:'#4F8EF7'},
+    {l:'Radhika Total',   v:fmt(rVal),        ac:'#E882DC'},
+  ].map(st=>`<div class="sc" style="--acl:${st.ac}"><div class="sl">${st.l}</div><div class="sv ${st.cl||''}">${st.v}</div>${st.s?`<div class="ss">${st.s}</div>`:''}</div>`).join('');
+
+  // Owner split
+  const sPct = cVal?(sVal/cVal*100):50;
+  document.getElementById('ov-osplit').innerHTML = `<div class="os-seg" style="width:${sPct}%;background:#4F8EF7"></div><div class="os-seg" style="width:${100-sPct}%;background:#E882DC"></div>`;
+  document.getElementById('ov-osplit-lbl').textContent = `Selvam ${sPct.toFixed(1)}% · Radhika ${(100-sPct).toFixed(1)}%`;
+  document.getElementById('ov-osplit-leg').innerHTML = [
+    {c:'#4F8EF7',o:'Selvam',v:fmt(sVal)},
+    {c:'#E882DC',o:'Radhika',v:fmt(rVal)}
+  ].map(x=>`<div style="display:flex;gap:6px;align-items:center"><div style="width:8px;height:8px;border-radius:50%;background:${x.c}"></div><span style="color:var(--t2)">${x.o}</span><span style="font-family:var(--mono);color:${x.c}">${x.v}</span></div>`).join('');
+
+  // Broker allocation
+  if(S.summary?.brokers) {
+    const brs  = S.summary.brokers.filter(b=>b.total_value>0);
+    const maxV = Math.max(...brs.map(b=>toInr(b.total_value,b.currency)));
+    document.getElementById('ov-brokers').innerHTML = brs.map(b=>{
+      const val=toInr(b.total_value,b.currency), inv=toInr(b.total_invested,b.currency);
+      const p=inv?(val-inv)/inv*100:0, w=maxV?(val/maxV*100):0, c=bc(b.broker);
+      return `<div style="margin-bottom:11px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:3px;height:15px;border-radius:2px;background:${c}"></div>
+            <span style="font-size:12px;font-weight:600;color:var(--t1)">${b.broker}</span>
+            <span class="b b-${b.owner==='radhika'?'r':'s'}">${b.owner}</span>
+          </div>
+          <div style="text-align:right"><span style="font-family:var(--mono);font-size:12px;font-weight:700">${fmt(val)}</span><span style="font-family:var(--mono);font-size:10px;margin-left:7px;color:${p>=0?'var(--up)':'var(--dn)'}">${pct(p)}</span></div>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px"><div style="height:100%;width:${w}%;background:${c};border-radius:2px;opacity:.7;transition:width .5s"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Asset donut
+  const amap = {}; h.forEach(x=>{ const t=(x.asset_type||'stock').toLowerCase().replace('_',' '); amap[t]=(amap[t]||0)+toInr(x.current_value,x.currency); });
+  const CL=['#00E5C3','#4F8EF7','#E882DC','#F7C948','#F06060','#7ED6A5'];
+  if(S.charts['asset']) { S.charts['asset'].destroy(); }
+  const ctx=document.getElementById('asset-ch');
+  if(ctx && Object.keys(amap).length) {
+    S.charts['asset']=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(amap),datasets:[{data:Object.values(amap),backgroundColor:CL,borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{color:'#6A7080',font:{size:11},boxWidth:10,padding:11}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmt(c.raw)}`}}}}});
+  }
+
+  // Movers
+  const sorted=[...h].filter(x=>x.pnl_percent!==null&&isFinite(x.pnl_percent)).sort((a,b)=>b.pnl_percent-a.pnl_percent);
+  const mrow=x=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)"><div><div style="font-family:var(--mono);font-size:12px;font-weight:700">${x.symbol}</div><div style="font-size:9px;color:var(--t3)">${x.broker}</div></div><div style="text-align:right"><div class="${uc(x.pnl_percent)}" style="font-family:var(--mono);font-size:12px;font-weight:700">${pct(x.pnl_percent)}</div><div style="font-family:var(--mono);font-size:10px;color:var(--t3)">${fmt(toInr(x.current_value,x.currency))}</div></div></div>`;
+  document.getElementById('ov-gainers').innerHTML=sorted.slice(0,7).map(mrow).join('');
+  document.getElementById('ov-losers').innerHTML=sorted.slice(-7).reverse().map(mrow).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// HOLDINGS TABLE
+// ══════════════════════════════════════════════════════════
+function renderTable() {
+  let items = fow(S.holdings);
+  if(S.hView!=='all') items=items.filter(h=>(h.asset_type||'').toLowerCase().includes(S.hView));
+  const q=S.query.toLowerCase();
+  if(q) items=items.filter(h=>(h.symbol||'').toLowerCase().includes(q)||(h.name||'').toLowerCase().includes(q)||(h.broker||'').toLowerCase().includes(q));
+  items=[...items].sort((a,b)=>{
+    let va=a[S.sortCol],vb=b[S.sortCol];
+    if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}
+    return va<vb?S.sortDir:va>vb?-S.sortDir:0;
+  });
+  const tb=document.getElementById('h-tbody');
+  if(!items.length){tb.innerHTML=`<tr><td colspan="10" class="empty"><div class="empty-i">◫</div><div class="empty-m">No holdings</div></td></tr>`;return;}
+  tb.innerHTML=items.map(h=>{
+    const vi=toInr(h.current_value,h.currency),ii=toInr(h.invested_value,h.currency),pi=vi-ii;
+    const pr=h.currency==='INR';
+    return `<tr>
+      <td><span class="sym">${h.symbol||'—'}</span></td>
+      <td><div class="nc">${h.name||'—'}</div></td>
+      <td><span class="b b-br" style="background:${bc(h.broker)}18;color:${bc(h.broker)}">${h.broker}</span></td>
+      <td class="num">${(h.quantity||0).toFixed(2)}</td>
+      <td class="num">${pr?fmt(h.average_price,2,'₹'):fmtUsd(h.average_price)}</td>
+      <td class="num">${pr?fmt(h.current_price,2,'₹'):fmtUsd(h.current_price)}</td>
+      <td class="num">${fmt(ii)}</td>
+      <td class="num">${fmt(vi)}</td>
+      <td class="num ${uc(pi)}">${fmt(pi)}</td>
+      <td class="num"><span class="b ${bup(h.pnl_percent)}">${pct(h.pnl_percent)}</span></td>
+    </tr>`;
+  }).join('');
+}
+function sort(col){S.sortCol===col?S.sortDir=-S.sortDir:(S.sortCol=col,S.sortDir=-1);renderTable();}
+function hv(v,el){S.hView=v;document.querySelectorAll('#tab-holdings .ptab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderTable();}
+function filt(){S.query=document.getElementById('srch-i').value;renderTable();}
+
+// ══════════════════════════════════════════════════════════
+// BROKER TABS
+// ══════════════════════════════════════════════════════════
+const BROKER_EL = {zerodha:'zc',sharekhan:'sc_',ibkr:'ic',etoro:'ec',aionion:'ac'};
+function renderBroker(tab) {
+  const bn=BROKER_MAP[tab], color=bc(bn);
+  const h=fow(S.holdings.filter(x=>x.broker===bn));
+  const val=h.reduce((a,x)=>a+toInr(x.current_value,x.currency),0);
+  const inv=h.reduce((a,x)=>a+toInr(x.invested_value,x.currency),0);
+  const pnl_=val-inv, pct_=inv?pnl_/inv*100:0;
+  const isIbkr=bn==='Interactive Brokers';
+  document.getElementById(BROKER_EL[tab]).innerHTML=`
+    <div class="sg" style="margin-bottom:15px">${[
+      {l:'Value',v:fmt(val),ac:color},{l:'Invested',v:fmt(inv),ac:'#4F8EF7'},
+      {l:'P&L',v:fmt(pnl_),s:pct(pct_),ac:pnl_>=0?'#00C7B1':'#F06060',cl:uc(pnl_)},{l:'Holdings',v:h.length,ac:color}
+    ].map(st=>`<div class="sc" style="--acl:${st.ac}"><div class="sl">${st.l}</div><div class="sv ${st.cl||''}">${st.v}</div>${st.s?`<div class="ss">${st.s}</div>`:''}</div>`).join('')}</div>
+    <div class="p"><div class="ph"><span class="pt">${bn} Holdings</span></div><div class="tw"><table>
+      <thead><tr><th>Symbol</th><th>Name</th>${isIbkr?'<th>Owner</th>':''}<th class="num">Qty</th><th class="num">Avg</th><th class="num">LTP</th><th class="num">Invested</th><th class="num">Value</th><th class="num">P&L</th><th class="num">P&L %</th></tr></thead>
+      <tbody>${h.sort((a,b)=>b.pnl_percent-a.pnl_percent).map(x=>{
+        const vi=toInr(x.current_value,x.currency),ii=toInr(x.invested_value,x.currency),pi=vi-ii,pr=x.currency==='INR';
+        return `<tr><td><span class="sym">${x.symbol}</span></td><td><div class="nc">${x.name||'—'}</div></td>${isIbkr?`<td><span class="b b-${x.owner==='radhika'?'r':'s'}">${x.owner}</span></td>`:''}<td class="num">${(x.quantity||0).toFixed(2)}</td><td class="num">${pr?fmt(x.average_price,2,'₹'):fmtUsd(x.average_price)}</td><td class="num">${pr?fmt(x.current_price,2,'₹'):fmtUsd(x.current_price)}</td><td class="num">${fmt(ii)}</td><td class="num">${fmt(vi)}</td><td class="num ${uc(pi)}">${fmt(pi)}</td><td class="num"><span class="b ${bup(x.pnl_percent)}">${pct(x.pnl_percent)}</span></td></tr>`;
+      }).join('')}</tbody>
+    </table></div></div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// COPY TRADERS
+// ══════════════════════════════════════════════════════════
+function setCTOwner(o){
+  S.ctOwner=o;
+  ['both','selvam','radhika'].forEach(x=>{document.getElementById('ct-ob-'+x).className='obtn'+(x===o?' a-'+o:'');});
+  renderCT();
+}
+function renderCT() {
+  let cts=S.copyTraders;
+  if(S.ctOwner!=='both') cts=cts.filter(c=>c.owner===S.ctOwner);
+  const td=cts.reduce((a,c)=>a+c.deposited,0),tv=cts.reduce((a,c)=>a+c.total_value,0);
+  const tu=cts.reduce((a,c)=>a+c.unrealized_pnl,0),tc=cts.reduce((a,c)=>a+c.closed_pnl,0);
+  document.getElementById('ct-stats').innerHTML=[
+    {l:'Portfolios',v:cts.length,ac:'#00E5C3'},{l:'Deployed',v:fmtUsd(td),ac:'#4F8EF7'},
+    {l:'Value',v:fmtUsd(tv),ac:'#00C7B1'},{l:'Unrealized P&L',v:fmtUsd(tu),ac:tu>=0?'#00C7B1':'#F06060',cl:uc(tu)},
+    {l:'Closed P&L',v:fmtUsd(tc),ac:tc>=0?'#7ED6A5':'#F87171',cl:uc(tc)},{l:'Total P&L',v:fmtUsd(tu+tc),ac:(tu+tc)>=0?'#00C7B1':'#F06060',cl:uc(tu+tc)},
+  ].map(st=>`<div class="sc" style="--acl:${st.ac}"><div class="sl">${st.l}</div><div class="sv ${st.cl||''}">${st.v}</div></div>`).join('');
+
+  const maxD=Math.max(...cts.map(c=>c.deposited),1);
+  const el=document.getElementById('ct-cards');
+  if(!cts.length){el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-i">⊕</div><div class="empty-m">No copy traders</div></div>`;return;}
+  el.innerHTML=cts.map(ct=>{
+    const ok=ct.total_pnl>=0, bc_=ok?'#00C7B1':'#F06060', bw=(ct.deposited/maxD*100).toFixed(1);
+    return `<div class="ctc" style="border-color:${bc_}28;border-top-color:${bc_}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div><div class="ctn">${ct.trader}</div>
+        <div class="ctm"><span class="b b-${ct.owner==='radhika'?'r':'s'}">${ct.owner}</span>${ct.is_paused?'<span class="b" style="background:rgba(247,168,79,.15);color:#F7A84F">Paused</span>':''}<span>${ct.started}</span></div></div>
+        <span class="ctp ${uc(ct.pnl_percent)}">${pct(ct.pnl_percent)}</span>
+      </div>
+      <div class="ct2">
+        ${[{l:'Deployed',v:fmtUsd(ct.deposited)},{l:'Value',v:fmtUsd(ct.total_value),c:'var(--t1)'},{l:'Unrealized',v:(ct.unrealized_pnl>=0?'+':'')+fmtUsd(ct.unrealized_pnl),c:ct.unrealized_pnl>=0?'var(--up)':'var(--dn)'},{l:'Closed P&L',v:(ct.closed_pnl>=0?'+':'')+fmtUsd(ct.closed_pnl),c:ct.closed_pnl>=0?'#7ED6A5':'#F87171'}].map(k=>`<div class="ctk"><div class="ctk-l">${k.l}</div><div class="ctk-v" style="color:${k.c||'var(--t2)'}">${k.v}</div></div>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--t3)">${ct.positions_count} positions · ${fmtUsd(ct.available)} available</div>
+      <div class="ct-bar"><div class="ct-bar-f" style="width:${bw}%;background:${bc_};opacity:.7"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// PERFORMANCE (eToro user-info gain API)
+// ══════════════════════════════════════════════════════════
+function renderPerf() {
+  const ph = S.perfHistory;
+
+  // Profile stat cards
+  const profEl = document.getElementById('perf-profiles');
+  const cards  = [];
+  ['selvam','radhika'].forEach(owner => {
+    const data = ph[owner];
+    if (!data) return;
+    const monthly = data.monthly || [];
+    const yearly  = data.yearly  || [];
+    const ytd     = yearly.find(y => y.date === new Date().getFullYear().toString());
+    const lastM   = monthly[monthly.length-1];
+    cards.push(`<div class="sc" style="--acl:${oc(owner)}">
+      <div class="sl">${owner === 'selvam' ? 'Selvam (amizhthini)' : 'Radhika (aadhirai)'}</div>
+      <div class="sv">${ytd ? pct(ytd.gain) : '—'}</div>
+      <div class="ss">YTD · Last month: ${lastM ? pct(lastM.gain) : '—'}</div>
+    </div>`);
+  });
+  profEl.innerHTML = cards.join('') || '<div class="empty"><div class="empty-m">Fetch performance data first</div></div>';
+
+  // Monthly chart per owner
+  function makeMonthlyChart(canvasId, owner, color) {
+    const data = ph[owner];
+    if (S.charts[canvasId]) { S.charts[canvasId].destroy(); }
+    const ctx = document.getElementById(canvasId);
+    if (!ctx || !data?.monthly?.length) return;
+    const monthly = data.monthly.slice(-24); // last 24 months
+    const labels  = monthly.map(m => m.date);
+    const gains   = monthly.map(m => +m.gain.toFixed(2)); // gain already in %
+    S.charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: gains,
+          backgroundColor: gains.map(g => g >= 0 ? color+'80' : '#F0606080'),
+          borderColor:     gains.map(g => g >= 0 ? color       : '#F06060'),
+          borderWidth: 1, borderRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(2)}%` } } },
+        scales: {
+          x: { ticks: { color: '#3A3F50', font: { size: 9 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,.03)' } },
+          y: { ticks: { color: '#6A7080', font: { size: 10 }, callback: v => v+'%' }, grid: { color: 'rgba(255,255,255,.05)' } }
+        }
+      }
+    });
+  }
+
+  makeMonthlyChart('perf-ch-s', 'selvam',  '#4F8EF7');
+  makeMonthlyChart('perf-ch-r', 'radhika', '#E882DC');
+
+  // Yearly combined chart
+  if (S.charts['perf-ch-y']) { S.charts['perf-ch-y'].destroy(); }
+  const yCtx = document.getElementById('perf-ch-y');
+  if (yCtx) {
+    const sYearly = ph.selvam?.yearly  || [];
+    const rYearly = ph.radhika?.yearly || [];
+    const allYears = [...new Set([...sYearly.map(y=>y.date), ...rYearly.map(y=>y.date)])].sort();
+    S.charts['perf-ch-y'] = new Chart(yCtx, {
+      type: 'bar',
+      data: {
+        labels: allYears,
+        datasets: [
+          {
+            label: 'Selvam',
+            data: allYears.map(yr => { const f=sYearly.find(y=>y.date===yr); return f ? +f.gain.toFixed(2) : null; }),
+            backgroundColor: '#4F8EF780', borderColor: '#4F8EF7', borderWidth: 1, borderRadius: 3,
+          },
+          {
+            label: 'Radhika',
+            data: allYears.map(yr => { const f=rYearly.find(y=>y.date===yr); return f ? +f.gain.toFixed(2) : null; }),
+            backgroundColor: '#E882DC80', borderColor: '#E882DC', borderWidth: 1, borderRadius: 3,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#6A7080', font: { size: 11 }, boxWidth: 12 } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw?.toFixed(2)}%` } } },
+        scales: {
+          x: { ticks: { color: '#3A3F50' }, grid: { color: 'rgba(255,255,255,.03)' } },
+          y: { ticks: { color: '#6A7080', callback: v => v+'%' }, grid: { color: 'rgba(255,255,255,.05)' } }
+        }
+      }
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// OWNER TOGGLE
+// ══════════════════════════════════════════════════════════
+function setOwner(o) {
+  S.owner = o;
+  ['both','selvam','radhika'].forEach(x=>{document.getElementById('ob-'+x).className='obtn'+(x===o?' a-'+o:'');});
+  const tab=document.querySelector('.ni.active')?.dataset.tab||'overview';
+  if(tab==='overview') renderOv();
+  if(tab==='holdings') renderTable();
+  if(['zerodha','sharekhan','ibkr','etoro','aionion'].includes(tab)) renderBroker(tab);
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  refresh();
+  setInterval(refresh, 5*60*1000); // auto-refresh every 5 min
+});
+
+// Register service worker for PWA / offline support
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(
+    () => console.log('[TRaMS] SW registered'),
+    e  => console.warn('[TRaMS] SW failed', e)
+  );
+}
+</script>
+</body>
+</html>
